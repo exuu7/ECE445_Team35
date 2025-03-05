@@ -3,11 +3,18 @@ const int analogPin = 4; // ESP32 Analog Pin
 const int resistorValue = 10000; // 10k resistor used with the thermistor
 const int nomTemp = 25; // temperature that the thermistor was tested under
 const int nomRes = 10000; // resistance of the thermistor standard temp
-
+const float sthh_const = 3950.0; // constant used in steinhart-hart equation
+const float kel_const = 273.15; // kelvin constant
+const int threshold = 85; // threshold temperature
+// this pin is for the led. The led indicates whether or not the temperature is past the threshold.
+// This is to mimic the signal sent to lower the window
+// LED ON: Temperature is too high
+// LED OFF: Temperature is safe
+const int redLED = 10; 
 // sets up the esp32 with the pins and serial monitor
 void setup() { 
   Serial.begin(115200); // sets the correct serial baud rate
-  pinMode(7, OUTPUT); // this pin is for the led. We are using an led to ensure that the esp is setup correctly and is recieving the code
+  pinMode(redLED, OUTPUT); 
 }
 
 void loop() {
@@ -25,13 +32,13 @@ void loop() {
   float resistance = (volt * resistorValue)/ (3.3 - volt); //this finds the updated resistance value using the above voltage 
 
   // converts resistance to temperature using the Steinhart-Hart equation
-  float kelvin = 1 / (((log(resistance / nomRes)) / 3950.0) + (1 / (nomTemp + 273.15)));
+  float kelvin = 1 / (((log(resistance / nomRes)) / sthh_const) + (1 / (nomTemp + kel_const)));
 
-  float Cels = kelvin - 273.15; // convert Kelvin to Celsius 
+  float Cels = kelvin - kel_const; // convert Kelvin to Celsius 
   float Fah = 1.8 * Cels + 32.0; // convert temp to Fahrenheit
 
   // setting temperature threshold for when to lower the windows.
-  if(Fah >= 85 ){
+  if(Fah >= threshold ){
     digitalWrite(7,HIGH); // led is set to on
     // Serial.println("THE CAR IS TOOOOOO HOT ");
     Serial.println("The car is over 85. Lower windows!");
