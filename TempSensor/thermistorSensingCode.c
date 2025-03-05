@@ -12,7 +12,7 @@ void setup() {
 
 void loop() {
   
-  digitalWrite(7,HIGH); // led is set to on
+  
   
   int sensorValue = analogRead(analogPin); // stores the raw resistance value of the thermistor
 
@@ -30,6 +30,16 @@ void loop() {
   float Cels = kelvin - 273.15; // convert Kelvin to Celsius 
   float Fah = 1.8 * Cels + 32.0; // convert temp to Fahrenheit
 
+  // setting temperature threshold for when to lower the windows.
+  if(Fah >= 85 ){
+    digitalWrite(7,HIGH); // led is set to on
+    // Serial.println("THE CAR IS TOOOOOO HOT ");
+    Serial.println("The car is over 85. Lower windows!");
+  }
+  else{
+    digitalWrite(7,LOW); // led is set to on
+    Serial.println("The car is under 85");
+  }
   // Print values to serial monitor
   Serial.print("Voltage: ");
   Serial.print(volt);
