@@ -5,7 +5,8 @@ const int echoPin = 12; // pin that the echo pin is connected to on the microcon
 // LED ON: The window is not lowered
 // LED OFF: The window is lowered
 const int blueLED = 20; 
-const int thresholdProx = 2; // threshold for how far away the window should be to confirm whether the window is present in front
+// threshold for how far away the window should be to confirm whether the window is present in front
+const int thresholdProx = 2; 
 
 #define SOUND_SPEED 0.034 // velocity of sound in cm/us
 #define CM_TO_INCH 0.393701 // allows for conversion for centimeters to inches
@@ -40,22 +41,22 @@ void loop() {
   
 
   // converts the time to distance
-  distCm = duration * SOUND_SPEED/2;
+  distCm = objDectTime * SOUND_SPEED/2;
   
   // Convert to distance from cm to inches
-  distIn = distanceCm * CM_TO_INCH;
+  distIn = distCm * CM_TO_INCH;
 
 
   windowLowering = 1; // the window is lowering
   // the window has been sent a signal to lower and it has lowered past the proximity sensor. 
   // This confirms that the window has lowered
-  if(windowLowering == 1 && distanceInch >= thresholdProx){ 
+  if(windowLowering == 1 && distIn >= thresholdProx){ 
     digitalWrite(blueLED, LOW);
-    Serial.print("The window is lowered and is not lowering further");
+    Serial.print("The window is lowered and is not lowering further \n");
     windowLowering = 0; // reset signal
   }
   else{ // The window is up and has not lowered.
-    Serial.print("The window is not lowered");
+    Serial.print("The window is not lowered \n");
     digitalWrite(blueLED, HIGH);
   }
   
