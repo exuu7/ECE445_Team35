@@ -14,11 +14,21 @@ void setup() {
   // Serial.println("Calibration done!");
 }
 
+
+
 void loop() {
     sensorValue = analogRead(analogInPin);   
+    float coLevel = sensorValue / GasFactor;
     Serial.print("CO Sensor   : ");
-    Serial.print(sensorValue / GasFactor);  
+    Serial.print(coLevel);  
     Serial.println(" ppm");
+    if(coLevel >= 9){
+      digitalWrite(3,HIGH);
+      Serial.println("CO Level is too high. Get your exhaust checked. Exit vehicle asap!!");
+    }
+    else{
+      Serial.println("CO levels are safe.");
+    }
     delay(1750);
 // read the analog in value:
   // sensorValue = analogRead(analogInPin);
