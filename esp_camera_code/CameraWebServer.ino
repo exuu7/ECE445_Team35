@@ -35,14 +35,10 @@
 //#define CAMERA_MODEL_DFRobot_Romeo_ESP32S3 // Has PSRAM
 #include "camera_pins.h"
 
-// ===========================
-// Enter your WiFi credentials
-// ===========================
-
-
+// WiFi credentials
 const char* ssid = "direcTori";
 const char* password = "123456789";
-// const int max_connection=3;
+// const int max_connection = 3;
 // const int channel = 4;
 // const int ssid_hidden = 0;
 WiFiServer server(80);
@@ -136,7 +132,7 @@ void setup() {
 //   s->set_vflip(s, 1);
 // #endif
 
-// Setup LED FLash if LED pin is defined in camera_pins.h
+// setup LED FLash if LED pin is defined in camera_pins.h
 #if defined(LED_GPIO_NUM)
   setupLedFlash(LED_GPIO_NUM);
 #endif
@@ -152,23 +148,24 @@ void setup() {
   // Serial.println("");
   // Serial.println("WiFi connected");
   // Serial.println("Before Tori is on");
+
+  // uncomment the below code for ESP32 as its own router
   Serial.print("Setting AP (Access Point)…");
   WiFi.softAP(ssid, password);
 
-  IPAddress IP = WiFi.softAPIP();
-  Serial.print("AP IP address: ");
+  IPAddress IP = WiFi.softAPIP(); // esp32 supports its own wifi
+  Serial.print("Software AP IP address: ");
   Serial.println(IP);
   // WiFi.enableLongRange(true);
   startCameraServer();
 
-  Serial.print("Camera Ready! Use 'http://");
-  // Serial.print(IP);
-  Serial.print(WiFi.localIP());
+  Serial.print("The Camera web server is ready! Go to 'http://");
+  Serial.print(IP);
+  // Serial.print(WiFi.localIP());
   Serial.println("' to connect");
 }
 
 void loop() {
-  // Do nothing. Everything is done in another task by the web server
   // Serial.println("RSSI: ");
   // Serial.println(WiFi.RSSI());
   delay(10000);
