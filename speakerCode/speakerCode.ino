@@ -4,9 +4,15 @@
 #include "driver/i2s.h" //I2S communication protocol with speaker
 // #include "Audio.h"
 
+// #define I2S_DOUT      47   // Data out pin
+// #define I2S_BCLK      38   // Bit clock pin
+// #define I2S_LRC       48   // Left-right clock pin
+
+
 #define I2S_DOUT      42   // Data out pin
 #define I2S_BCLK      41   // Bit clock pin
 #define I2S_LRC       40   // Left-right clock pin
+
 
 #define SAMPLE_RATE   44100  // Audio sample rate (Hz)
 // Audio audio;
@@ -39,7 +45,7 @@ void setupI2S() {
 
 // Generate a sine wave and play
 void genSineWave() {
-    const int amplitude = 25000; // amplitude of sine wave
+    const int amplitude = 2700; // amplitude of sine wave
     const int freq = 440;        // frequency of note (A4) in Hz
     int16_t tempBuff[128];
  
