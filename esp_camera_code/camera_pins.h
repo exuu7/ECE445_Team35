@@ -159,8 +159,8 @@
 
 #elif defined(CAMERA_MODEL_AI_THINKER)
 #define PWDN_GPIO_NUM  1
-#define RESET_GPIO_NUM 9
-#define XCLK_GPIO_NUM  0 // do not have
+#define RESET_GPIO_NUM -1
+#define XCLK_GPIO_NUM  17 // do not have
 #define SIOD_GPIO_NUM  12 // SDA = SIOD
 #define SIOC_GPIO_NUM  11 // SCL = SIOC
 
@@ -174,7 +174,7 @@
 #define Y2_GPIO_NUM    21
 #define VSYNC_GPIO_NUM 8
 #define HREF_GPIO_NUM  18 // HSYNC = HREF
-#define PCLK_GPIO_NUM  17  // MCLK = PCLK
+#define PCLK_GPIO_NUM  10  // MCLK = PCLK
 
 // 4 for flash led or 33 for normal led
 // #define LED_GPIO_NUM   4
