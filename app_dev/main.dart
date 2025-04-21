@@ -143,8 +143,8 @@ class HomePage extends StatelessWidget {
 
     // temporary for now
     int tempVal = 81;
-    int coVal = 4;
-    int batVal = 20;
+    int coVal = 9;
+    int batVal = 50;
     
     // reference: https://www.youtube.com/watch?v=AQT05gjCBtY
     // Color _setColor(String color){
@@ -196,84 +196,133 @@ class HomePage extends StatelessWidget {
                     // whereas expaanded takes as much space as it wants
                     Flexible(
                       flex: 3,
-                      child:Container( // box for livestream
+                      child: Container( // box for livestream
+                        // create a border
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.black, width: 2),
+                          borderRadius: BorderRadius.all(Radius.circular(10)), 
+                        ),
                         margin: const EdgeInsets.all(10.0),
-                        color: const Color.fromARGB(255, 235, 110, 210),
-                        height: 400.0,
-                        width: 1000.0,
+                        //color: const Color.fromARGB(255, 235, 110, 210),
+                        height: 500.0,
+                        width: 800.0,
                         child:Center(child: Text("Camera Footage", textAlign:TextAlign.center)), 
                       ), // end of box for livestream
                     ),
+
                     Flexible(
                       flex: 1,
-                      child:SizedBox(height: 90)),
+                      child:SizedBox(height: 90)
+                    ),
+                    
+                    // Temp reading
                     Flexible(
-                      // temp reading
                       flex: 1,
                       child: Container(
-                        padding: EdgeInsets.only(left: 30,right: 30),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(30.0),
+                        // create border around shape
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.black, width: 2),
+                          borderRadius: BorderRadius.all(Radius.circular(20)), 
+                        ),
+                        margin: EdgeInsets.only(left: 50,right: 50),
+                        // create rounded rectangle shape
+                        child: ClipRRect(                
+                          borderRadius: BorderRadius.circular(17.0),
                           child: Container(
-                            // color: tempVal > 85 ? Colors.redAccent : Colors.green,
                             color: tempVal > 85 ? Colors.redAccent : tempVal > 80 ? Colors.orange : Colors.green,
                             height: 50,
-                            width: 1000,
-                            
-                            child:Center(child: Text( "The car is at $tempVal F", textAlign:TextAlign.center)),
-                          ),
-                        ),
-                      ),
-                    ),  
-
-                    //space between temp and CO
-                    Flexible(
-                      flex: 1,
-                      child:SizedBox(height: 10)),
-                      
-                    // CO sensor
-                    Flexible(
-                      flex: 1,
-                      child:Container(
-                        padding: EdgeInsets.only(left: 30,right: 30),
-                        
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(30.0),
-                          child: Container(
-                            color: coVal >= 9 ? Colors.redAccent : coVal >= 7 ? Colors.orange : Colors.green,
-                            height: 50,
-                            width: 1000,
-                            child: Center(child: Text ("CO Sensor Data: $coVal ppm", textAlign: TextAlign.center,))
-                          )
-                        ),
-                      ),
-                    ),
-              
-                      // space between CO and car battery temp
-                    Flexible(
-                      flex: 1,
-                      child:SizedBox(height: 10)),
-                      
-                      // Battery Temperature Readings
-                      Flexible(
-                        flex: 1,
-                        child:Container(
-                          padding: EdgeInsets.only(left: 30,right: 30),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(30.0),
-                            child: Container(
-                              color: batVal >= 100 ? Colors.redAccent : batVal > 90 ? Colors.orange : Colors.green,
-                              // color: const Color.fromARGB(255, 93, 169, 94),
-                              height: 50,
-                              width: 1000,
-                              child:Center(child: Text("Battery Temperature: $batVal F", textAlign:TextAlign.center)),
+                            width: 700,                   
+                            child:Center(
+                              child:Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.car_crash),
+                                  SizedBox(width: 4), 
+                                  Text("Car Temperature: $tempVal°F", textAlign: TextAlign.center,),
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      )
-                    ], // end of children <widget>
-                ), // end of column for first child
-          ), // body ends here
+                      ), 
+                    ), 
+
+                    // space between temp and CO
+                    Flexible(
+                      flex: 1,
+                      child:SizedBox(height: 10)
+                    ),
+                      
+                    // CO reading
+                    Flexible(
+                      flex: 1,
+                      child: Container(
+                        // create border around shape
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.black, width: 2),
+                          borderRadius: BorderRadius.all(Radius.circular(20)), 
+                        ),
+                        margin: EdgeInsets.only(left: 50,right: 50),
+                        // create rounded rectangle shape
+                        child: ClipRRect(                
+                          borderRadius: BorderRadius.circular(17.0),
+                          child: Container(
+                            color: coVal >= 9 ? Colors.redAccent : coVal >= 7 ? Colors.orange : Colors.green,
+                            height: 50,
+                            width: 700,                   
+                            child:Center(
+                              child:Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.device_thermostat),
+                                  Text("CO Levels: $coVal ppm", textAlign: TextAlign.center,),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ), 
+                    ), 
+              
+                    // space between CO and car battery temp
+                    Flexible(
+                      flex: 1,
+                      child:SizedBox(height: 10)
+                    ),
+                      
+                    // Battery Temperature Readings
+                    Flexible(
+                      flex: 1,
+                      child: Container(
+                      // create border around shape
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.black, width: 2),
+                        borderRadius: BorderRadius.all(Radius.circular(20)), 
+                      ),
+                      margin: EdgeInsets.only(left: 50,right: 50),
+                      // create rounded rectangle shape
+                      child: ClipRRect(                
+                        borderRadius: BorderRadius.circular(17.0),
+                        child: Container(
+                          color: batVal >= 100 ? Colors.redAccent : batVal >= 90 ? Colors.orange : Colors.green,
+                          height: 50,
+                          width: 700,                   
+                          child:Center(
+                            child:Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.battery_4_bar),
+                                Text("Battery Temperature: $batVal F", textAlign: TextAlign.center,),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),   
+                  )
+                ], // end of children <widget>
+              ), // end of column for first child
+        ), // body ends here
         
           // floatingActionButton: FloatingActionButton(
           //   onPressed: _incrementCounter,
@@ -328,17 +377,22 @@ class InfoPage extends StatelessWidget {
                   //     Text("The green color means that the levels are safe.\n The orange color means that the level is ok but not optimal.\n The red means the levels are too high"),
                   //     ),
                   Flexible(
-                        // temp reading
+                      // temp reading
                       flex: 1,
                       child: Container(
-                        padding: EdgeInsets.only(left: 30,right: 30),
+                        //padding: EdgeInsets.only(left: 30,right: 30),
+                        // create border around shape
+                        decoration: BoxDecoration(
+                            border: Border.all(color: Colors.black, width: 2),
+                            borderRadius: BorderRadius.all(Radius.circular(20)), 
+                          ),
+                          margin: EdgeInsets.only(left: 50,right: 50),
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(30.0),
+                          borderRadius: BorderRadius.circular(17.0),
                           child: Container(
                             color: Colors.green,
                             height: 50,
-                            width: 1000,
-                            
+                            width: 1000,                         
                             child:Center(child: Text( "This color means levels are safe", textAlign:TextAlign.center)),
                           ),
                         ),
@@ -348,16 +402,22 @@ class InfoPage extends StatelessWidget {
                     //space between temp and CO
                     Flexible(
                       flex: 1,
-                      child:SizedBox(height: 10)),
+                      child:SizedBox(height: 10)
+                    ),
                       
                     // CO sensor
                     Flexible(
                       flex: 1,
                       child:Container(
-                        padding: EdgeInsets.only(left: 30,right: 30),
-                        
+                        // padding: EdgeInsets.only(left: 30,right: 30),
+                        // create border around shape
+                        decoration: BoxDecoration(
+                            border: Border.all(color: Colors.black, width: 2),
+                            borderRadius: BorderRadius.all(Radius.circular(20)), 
+                          ),
+                          margin: EdgeInsets.only(left: 50,right: 50),
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(30.0),
+                          borderRadius: BorderRadius.circular(17),
                           child: Container(
                             color:  Colors.orange,
                             height: 50,
@@ -371,28 +431,34 @@ class InfoPage extends StatelessWidget {
                       // space between CO and car battery temp
                     Flexible(
                       flex: 1,
-                      child:SizedBox(height: 10)),
+                      child:SizedBox(height: 10)
+                    ),
                       
-                      // Battery Temperature Readings
-                      Flexible(
-                        flex: 1,
-                        child:Container(
-                          padding: EdgeInsets.only(left: 30,right: 30),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(30.0),
-                            child: Container(
-                              color: Colors.redAccent,
-                              // color: const Color.fromARGB(255, 93, 169, 94),
-                              height: 50,
-                              width: 1000,
-                              child:Center(child: Text("This color means the levels are too high", textAlign:TextAlign.center)),
-                            ),
+                    // Battery Temperature Readings
+                    Flexible(
+                      flex: 1,
+                      child:Container(
+                        //padding: EdgeInsets.only(left: 30,right: 30),
+                        // create border around shape
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.black, width: 2),
+                          borderRadius: BorderRadius.all(Radius.circular(20)), 
+                        ),
+                        margin: EdgeInsets.only(left: 50,right: 50),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(17.0),
+                          child: Container(
+                            color: Colors.redAccent,
+                            // color: const Color.fromARGB(255, 93, 169, 94),
+                            height: 50,
+                            width: 1000,
+                            child:Center(child: Text("This color means the levels are too high", textAlign:TextAlign.center)),
                           ),
                         ),
-                      )
+                      ),
+                    )
                   ]
             ), // end of column
-        
           )
         ); // end of scaffold
       }
