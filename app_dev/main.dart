@@ -190,10 +190,40 @@ class HomePage extends StatelessWidget {
                   // action in the IDE, or press "p" in the console), to see the
                   // wireframe for each widget.
                   
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: <Widget>[
                     // used flexible instead of expanded bc flexible allows the widget to control the size 
-                    // whereas expaanded takes as much space as it wants
+                    // whereas expanded takes as much space as it wants
+                    
+                    Flexible(
+                      flex: 1,
+                      child:SizedBox(height: 100)
+                    ),
+                    
+                    Flexible(
+                      flex: 3,
+                      child: Container( // box for text
+                        // create a border
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.black, width: 2),
+                          borderRadius: BorderRadius.all(Radius.circular(10)), 
+                        ),
+                        margin: const EdgeInsets.all(10.0),
+                        //color: const Color.fromARGB(255, 235, 110, 210),
+                        height: 35.0,
+                        width: 200.0,
+                        child:Center(
+                          child:Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.videocam),
+                              Text("Livestream Footage", textAlign: TextAlign.center,),
+                            ],
+                          ),
+                        ),
+                      ), // end of box for livestream
+                    ),
+
                     Flexible(
                       flex: 3,
                       child: Container( // box for livestream
@@ -212,7 +242,7 @@ class HomePage extends StatelessWidget {
 
                     Flexible(
                       flex: 1,
-                      child:SizedBox(height: 90)
+                      child:SizedBox(height: 200)
                     ),
                     
                     // Temp reading
