@@ -37,6 +37,13 @@ dependencies:
   camera: ^0.11.1
   gal: ^2.3.1
 
+  # advanced_splashscreen: ^0.0.1
+  loading_animations: "^2.1.0"
+  connectivity_plus: ^6.1.4
+  flutter_mjpeg: ^2.0.4
+  url_launcher: ^6.3.1
+  # flutter_local_notifications: ^19.1.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
