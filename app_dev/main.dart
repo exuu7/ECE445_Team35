@@ -4,9 +4,13 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_mjpeg/flutter_mjpeg.dart';
 import 'package:url_launcher/url_launcher.dart';
-//import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'notifs.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  Notifs().initNotification();
+
   runApp(const MyApp());
 }
 
@@ -221,7 +225,7 @@ class HomePage extends StatelessWidget {
   //     _counter++;
   //   });
   // }
-
+  const HomePage({super.key});
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -263,6 +267,7 @@ class HomePage extends StatelessWidget {
             // the App.build method, and use it to set our appbar title.
             title: Text("CarGuard"),
           ),
+
           body: Center(
             // Center is a layout widget. It takes a single child and positions it
             // in the middle of the parent.
@@ -286,6 +291,17 @@ class HomePage extends StatelessWidget {
                   children: <Widget>[
                     // used flexible instead of expanded bc flexible allows the widget to control the size 
                     // whereas expanded takes as much space as it wants
+                    
+                    // test button for sending notifications
+                    ElevatedButton(
+                      onPressed: () {
+                        Notifs().showNotifs(
+                          title: "Title",
+                          body: "Body",
+                        );
+                      },
+                      child: const Text("test"),
+                    ),
                     
                     Flexible(
                       flex: 1,
@@ -336,6 +352,21 @@ class HomePage extends StatelessWidget {
                         onTap: () => launchUrl(uri),
                       ) 
                     ),
+
+                    // Flexible(
+                    //   flex: 1,
+                    //   child: Center(
+                    //     child: ElevatedButton(
+                    //       onPressed: () {
+                    //         Notifs().showNotifs(
+                    //           title: "Title",
+                    //           body: "Body",
+                    //         );
+                    //       },
+                    //       child: const Text("test"),
+                    //     ),
+                    //   ),
+                    // ),
                     
                     // Flexible(
                     //   flex: 3,
