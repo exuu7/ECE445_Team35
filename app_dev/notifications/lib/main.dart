@@ -159,12 +159,33 @@ class HomePage extends StatelessWidget {
     // than having to individually change instances of widgets.
 
     // temporary for now
-    int tempVal = 81;
-    int coVal = 9;
+    int tempVal = 89;
+    int coVal = 11;
     int batVal = 50;
 
     var uri = Uri.http('192.168.4.1', '');
     
+    if (tempVal >= 85){
+      local_notifs.giveNotif(
+                          title: "CarGuard temperature warning",
+                          body: "The temperature inside your car is too high! Opening window. Please return to your vehicle immediately.",
+                          payload: "temp",
+                          );
+    }
+    if (coVal >= 9){
+      local_notifs.giveNotif(
+                          title: "CarGuard CO warning",
+                          body: "The CO levels in your vehicle is too high. Please evacuate for safety and check your vehicle's exhaust system.",
+                          payload: "CO",
+                          );
+    }
+    if (batVal >= 100){
+      local_notifs.giveNotif(
+                          title: "CarGuard battery warning",
+                          body: "The temperature of the battery is too high. Please replace the battery.",
+                          payload: "CO",
+                          );
+    }
     // reference: https://www.youtube.com/watch?v=AQT05gjCBtY
     // Color _setColor(String color){
     //   if(color == "red"){
@@ -215,6 +236,9 @@ class HomePage extends StatelessWidget {
                     // used flexible instead of expanded bc flexible allows the widget to control the size 
                     // whereas expanded takes as much space as it wants
                     
+                    
+
+
                     Flexible(
                       flex: 1,
                       child:SizedBox(height: 100)
