@@ -11,7 +11,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 https://www.youtube.com/watch?v=--PQXg_mx9I&t=802s 
 https://www.youtube.com/watch?v=26TTYlwc6FM 
 
-Flutter push notifications documentation and set up code: https://pub.dev/packages/flutter_local_notifications#requesting-permissions-on-android-13-or-higher
+Flutter push notifications documentation and set up code: https://pub.dev/packages/flutter_local_notifications
 */
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
