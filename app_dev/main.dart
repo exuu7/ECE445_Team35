@@ -1,18 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:test_notifs/notification.dart';
 
-import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_mjpeg/flutter_mjpeg.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'notifs.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
+import 'package:flutter_local_notifications/flutter_local_notifications.dart'; 
+
+
+/* citations: https://www.youtube.com/watch?v=rT7-p5t_35c
+https://www.youtube.com/watch?v=--PQXg_mx9I&t=802s 
+https://www.youtube.com/watch?v=26TTYlwc6FM 
+
+Flutter push notifications documentation and set up code: https://pub.dev/packages/flutter_local_notifications#requesting-permissions-on-android-13-or-higher
+*/
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  Notifs().initNotification();
-
+  // pushNotifs().initNotification();
+  local_notifs.init();
   runApp(const MyApp());
 }
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -44,90 +51,6 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
-// class WifiCheck extends StatefulWidget {
-//   @override
-//   _WifiCheckState createState() => _WifiCheckState();
-  
-// }
-
-// class _WifiCheckState extends State<WifiCheck> {
-//   final String targetSSID = "direcTori";
-
-//   List<ConnectivityResult> _connectionStatus = [ConnectivityResult.none];
-//   final Connectivity _connectivity = Connectivity();
-
-//   bool isTargetSSID = true;
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     isTargetSSID = false;
-
-//     initConnectivity();
-//   }
-
-
-//   Future<void> initConnectivity() async {
-//     late List<ConnectivityResult> result;
-//     // Platform messages may fail, so we use a try/catch PlatformException.
-//     try {
-//       result = await _connectivity.checkConnectivity();
-//     } on PlatformException catch (e) {
-//       developer.log('Couldn\'t check connectivity status', error: e);
-//       return;
-//     }
-
-//     // If the widget was removed from the tree while the asynchronous platform
-//     // message was in flight, we want to discard the reply rather than calling
-//     // setState to update our non-existent appearance.
-//     if (!mounted) {
-//       return Future.value(null);
-//     }
-
-//     return _updateConnectionStatus(result);
-//   }
-//   Future<void> _updateConnectionStatus(List<ConnectivityResult> result) async {
-//     setState(() {
-//       _connectionStatus = result;
-//     });
-//     // ignore: avoid_print
-//     print('Connectivity changed: $_connectionStatus');
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: const Text('Connectivity Plus Example'),
-//         elevation: 4,
-//       ),
-//       body: Column(
-//         mainAxisSize: MainAxisSize.min,
-//         children: [
-//           const Spacer(flex: 2),
-//           Text(
-//             'Active connection types:',
-//             style: Theme.of(context).textTheme.headlineMedium,
-//           ),
-//           const Spacer(),
-//           ListView(
-//             shrinkWrap: true,
-//             children: List.generate(
-//                 _connectionStatus.length,
-//                 (index) => Center(
-//                       child: Text(
-//                         _connectionStatus[index].toString(),
-//                         style: Theme.of(context).textTheme.headlineSmall,
-//                       ),
-//                     )),
-//           ),
-//           const Spacer(flex: 2),
-//         ],
-//       ),
-//     );
-//   }
-// }
 
 class MyHamburgerClass extends StatefulWidget {
   @override
@@ -225,7 +148,7 @@ class HomePage extends StatelessWidget {
   //     _counter++;
   //   });
   // }
-  const HomePage({super.key});
+
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -236,12 +159,33 @@ class HomePage extends StatelessWidget {
     // than having to individually change instances of widgets.
 
     // temporary for now
-    int tempVal = 81;
-    int coVal = 9;
+    int tempVal = 89;
+    int coVal = 11;
     int batVal = 50;
 
     var uri = Uri.http('192.168.4.1', '');
     
+    if (tempVal >= 85){
+      local_notifs.giveNotif(
+                          title: "CarGuard temperature warning",
+                          body: "The temperature inside your car is too high! Opening window. Please return to your vehicle immediately.",
+                          payload: "temp",
+                          );
+    }
+    if (coVal >= 9){
+      local_notifs.giveNotif(
+                          title: "CarGuard CO warning",
+                          body: "The CO levels in your vehicle is too high. Please evacuate for safety and check your vehicle's exhaust system.",
+                          payload: "CO",
+                          );
+    }
+    if (batVal >= 100){
+      local_notifs.giveNotif(
+                          title: "CarGuard battery warning",
+                          body: "The temperature of the battery is too high. Please replace the battery.",
+                          payload: "CO",
+                          );
+    }
     // reference: https://www.youtube.com/watch?v=AQT05gjCBtY
     // Color _setColor(String color){
     //   if(color == "red"){
@@ -255,6 +199,7 @@ class HomePage extends StatelessWidget {
     //   }
     // }
   
+
     return LayoutBuilder(
       builder: (context, constraints) {
         return Scaffold(
@@ -267,7 +212,6 @@ class HomePage extends StatelessWidget {
             // the App.build method, and use it to set our appbar title.
             title: Text("CarGuard"),
           ),
-
           body: Center(
             // Center is a layout widget. It takes a single child and positions it
             // in the middle of the parent.
@@ -292,17 +236,9 @@ class HomePage extends StatelessWidget {
                     // used flexible instead of expanded bc flexible allows the widget to control the size 
                     // whereas expanded takes as much space as it wants
                     
-                    // test button for sending notifications
-                    ElevatedButton(
-                      onPressed: () {
-                        Notifs().showNotifs(
-                          title: "Title",
-                          body: "Body",
-                        );
-                      },
-                      child: const Text("test"),
-                    ),
                     
+
+
                     Flexible(
                       flex: 1,
                       child:SizedBox(height: 100)
@@ -333,56 +269,44 @@ class HomePage extends StatelessWidget {
                     ),
 
                     Flexible(
-                      child: Mjpeg(
-                          //isLive: isRunning.value,
-                          error: (context, error, stack) {
-                            print(error);
-                            print(stack);
-                            return Text(error.toString(), style: TextStyle(color: Colors.red));
-                          },
-                          stream:
-                          'http://192.168.4.1/',
-                      ),
+                      flex: 3,
+                      child: Container( // box for livestream
+                        // create a border
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.black, width: 2),
+                          borderRadius: BorderRadius.all(Radius.circular(10)), 
+                        ),
+                        margin: const EdgeInsets.all(10.0),
+                        //color: const Color.fromARGB(255, 235, 110, 210),
+                        height: 500.0,
+                        width: 800.0,
+                        child:Center(child: Text("Camera Footage", textAlign:TextAlign.center)), 
+                      ), // end of box for livestream
                     ),
-                    
+
+
                     Flexible(
                       flex: 1,
                       child: InkWell(
-                        child: Text("Access Livestream"),
+                        child: Text("Test"),
                         onTap: () => launchUrl(uri),
                       ) 
                     ),
 
-                    // Flexible(
-                    //   flex: 1,
-                    //   child: Center(
-                    //     child: ElevatedButton(
-                    //       onPressed: () {
-                    //         Notifs().showNotifs(
-                    //           title: "Title",
-                    //           body: "Body",
-                    //         );
-                    //       },
-                    //       child: const Text("test"),
-                    //     ),
-                    //   ),
-                    // ),
-                    
-                    // Flexible(
-                    //   flex: 3,
-                    //   child: Container( // box for livestream
-                    //     // create a border
-                    //     decoration: BoxDecoration(
-                    //       border: Border.all(color: Colors.black, width: 2),
-                    //       borderRadius: BorderRadius.all(Radius.circular(10)), 
-                    //     ),
-                    //     margin: const EdgeInsets.all(10.0),
-                    //     //color: const Color.fromARGB(255, 235, 110, 210),
-                    //     height: 500.0,
-                    //     width: 800.0,
-                    //     child:Center(child: Text("Camera Footage", textAlign:TextAlign.center)), 
-                    //   ), // end of box for livestream
-                    // ),
+
+                    Flexible(
+                      flex: 1,
+                      child: ElevatedButton(
+                        
+                        onPressed: () {local_notifs.giveNotif(
+                          title: "test title",
+                          body: "testing",
+                          payload: "adfa",
+                          );
+                        },
+                        child: const Text("send notification"),
+                        )
+                    ),
 
                     Flexible(
                       flex: 1,
