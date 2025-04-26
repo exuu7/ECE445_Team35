@@ -1,3 +1,4 @@
+// reference: https://pub.dev/packages/flutter_local_notifications#-ios-setup
 import 'package:flutter_local_notifications/flutter_local_notifications.dart'; 
 
 class local_notifs{
@@ -22,16 +23,12 @@ class local_notifs{
                 'demoCategory',
                 actions: <DarwinNotificationAction>[
                     DarwinNotificationAction.plain('id_1', 'Action 1'),
-                    DarwinNotificationAction.plain(
-                    'id_2',
-                    'Action 2',
+                    DarwinNotificationAction.plain('id_2','Action 2',
                     options: <DarwinNotificationActionOption>{
                         DarwinNotificationActionOption.destructive,
                     },
                     ),
-                    DarwinNotificationAction.plain(
-                    'id_3',
-                    'Action 3',
+                    DarwinNotificationAction.plain('id_3','Action 3',
                     options: <DarwinNotificationActionOption>{
                         DarwinNotificationActionOption.foreground,
                     },
@@ -74,7 +71,7 @@ class local_notifs{
         // ...
     },
     onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
-);
+    );
   }
 
   // simple notif
@@ -91,15 +88,14 @@ class local_notifs{
         ticker: 'ticker');
   const NotificationDetails notificationDetails =
       NotificationDetails(android: androidNotificationDetails);
+  // so notification are not overwritter in the banner
+  final id = DateTime.now().millisecondsSinceEpoch ~/ 1000;
   await flutterLocalNotificationsPlugin.show(
-      0, title, body, notificationDetails,
+      id, title, body, notificationDetails,
       payload: payload);
   print('sent!');
   }
 }
-
-
-
 
 // class pushNotifs {
 //   final notificationsPlugin = FlutterLocalNotificationsPlugin();
