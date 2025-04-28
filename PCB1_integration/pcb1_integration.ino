@@ -7,20 +7,45 @@
    Olav Kallhovd sept2017
    -------------------------------------------------------------------------------------
 */
+//Citation: https://kursatsayhan.medium.com/using-bluetooth-low-energy-ble-with-flutter-3c70469af814
+// Citation: https://forum.arduino.cc/t/how-do-you-convert-a-float-to-string-solved/237090/8
+
+#include <stdlib.h>
+#include <BLEDevice.h>
+#include <BLEUtils.h>
+#include <BLEServer.h>
+
+#define SERVICE_UUID        "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
+#define CHARACTERISTIC_UUID "beb5483e-36e1-4688-b7f5-ea07361b26a8"
+
 
 #include <HX711_ADC.h>
 #if defined(ESP8266)|| defined(ESP32) || defined(AVR)
 #include <EEPROM.h>
 #endif
 
-//pins:
-
+//--------------------------------------------------------------Bluetooth------------------------------------------------------------------
+BLEServer *pServer;
+BLEService *pService;
+BLECharacteristic *pCharacteristic;
 //--------------------------------------------------------------Microcontroller Pins--------------------------------------------------
 const int tempPin = 4; // ESP32 Temperature Sensor Analog Pin 
-const int trigPin = 13; // pin that the trigger pin - Prox PCB
-const int echoPin = 14; // pin that the echo pin - Prox PCB
+const int trigPin =12 ; // pin that the trigger pin - Prox PCB
+const int echoPin = 11; // pin that the echo pin - Prox PCB
 const int HX711_dout = 5; //mcu > HX711 dout pin - Weight PCB
 const int HX711_sck = 6; //mcu > HX711 sck pin - Weight PCB
+int redLED = 15; 
+int greenLED = 14;
+int blueLED = 13;
+// Motor A
+int motor1Pin1 = 41; 
+int motor1Pin2 = 40; 
+int enable1Pin = 42; 
+//----------------------------------------------------------------Motor Constants--------------------------------------------------------
+const int freq = 30000;
+const int pwmChannel = 0;
+const int resolution = 8;
+int dutyCycle = 200;
 
 //-------------------------------------------------------------Temperature Sensor Constants----------------------------------------------
 const int resistorValue = 10000; // 10k resistor used with the thermistor
@@ -32,7 +57,7 @@ const int thresholdTemp = 85; // threshold temperature
 
 //-----------------------------------------------------------Proximity Constants----------------------------------------------------------
 // threshold for how far away the window should be to confirm whether the window is present in front
-const int thresholdProx = 2; 
+const int thresholdProx = 3; 
 #define SOUND_SPEED 0.034 // velocity of sound in cm/us
 #define CM_TO_INCH 0.393701 // allows for conversion for centimeters to inches
 long objDectTime;
@@ -55,14 +80,36 @@ void setup() {
   Serial.begin(115200); // sets the correct serial baud rate
   pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output - emits the ultrasound
   pinMode(echoPin, INPUT); // Sets the echoPin as an Input - recieves the reflected wave
+  pinMode(greenLED, OUTPUT); // led for weight
+  pinMode(redLED, OUTPUT); // led for temp
+  pinMode(blueLED, OUTPUT); // led for temp
   delay(10);
   Serial.println();
   Serial.println("Starting...");
 
+     BLEDevice::init("Seri");
+    pServer = BLEDevice::createServer();
+    pService = pServer->createService(SERVICE_UUID);
+    pCharacteristic = pService->createCharacteristic(
+                                          CHARACTERISTIC_UUID,
+                                          BLECharacteristic::PROPERTY_READ |
+                                          BLECharacteristic::PROPERTY_WRITE
+                                        );
+
+
+  pService->start();
+  BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
+  pAdvertising->addServiceUUID(SERVICE_UUID);
+  pAdvertising->setScanResponse(true);
+  pAdvertising->setMinPreferred(0x06);
+  pAdvertising->setMinPreferred(0x12);
+  BLEDevice::startAdvertising();
+
   LoadCell.begin();
   //LoadCell.setReverseOutput(); //uncomment to turn a negative output value to positive
   float calibrationValue; // calibration value (see example file "Calibration.ino")
-  calibrationValue = -100.66; // uncomment this if you want to set the calibration value in the sketch
+  calibrationValue = -101.87; // uncomment this if you want to set the calibration value in the sketch
+  // calibrationValue = -100.66; // uncomment this if you want to set the calibration value in the sketch
 #if defined(ESP8266)|| defined(ESP32)
   //EEPROM.begin(512); // uncomment this if you use ESP8266/ESP32 and want to fetch the calibration value from eeprom
 #endif
@@ -82,7 +129,7 @@ void setup() {
 }
 
 void loop() {
-   int sensorValue = analogRead(tempPin); // stores the raw resistance value of the thermistor
+  int sensorValue = analogRead(tempPin); // stores the raw resistance value of the thermistor
   // Clears the trigPin to ensure a clear signal is sent when trigpin is high (prox)
   digitalWrite(trigPin, LOW);
   delayMicroseconds(2);
@@ -104,6 +151,13 @@ void loop() {
   distIn = distCm * CM_TO_INCH; // Convert to distance from cm to inches
   int confirmWindow = 0;
 
+  pinMode(motor1Pin1, OUTPUT);
+  pinMode(motor1Pin2, OUTPUT);
+  pinMode(enable1Pin, OUTPUT);
+  // configure LEDC PWM
+  ledcAttachChannel(enable1Pin, freq, resolution, pwmChannel);
+  Serial.print("Testing DC Motor...");
+
   // weight sensor code
   static boolean newDataReady = 0;
   const int serialPrintInterval = 0; //increase value to slow down serial print activity
@@ -118,10 +172,21 @@ void loop() {
   if (newDataReady) {
     if (millis() > t + serialPrintInterval) {
       float i = LoadCell.getData();
+      float pounds = i/(453.592);
       Serial.print("Load_cell output val: ");
-      Serial.println(i);
-      if(i >= 1800.1){
+      Serial.println(pounds);
+      char weightBuff[10];
+      String weight = "";
+      dtostrf(pounds, 4, 6, weightBuff);  //4 is mininum width, 6 is precision
+      weight = weightBuff;
+      // pCharacteristic->setValue();
+      pCharacteristic->setValue("Load Cell: " + weight);
+      if(pounds >= 3){
         childInCar = 1;
+        digitalWrite(greenLED, HIGH);
+      }
+      else{
+        digitalWrite(greenLED, LOW);
       }
       newDataReady = 0;
       t = millis();
@@ -139,39 +204,62 @@ void loop() {
     Serial.println("Tare complete");
   }
   
+  char tempBuff[10];
+  String temp = "";
+  dtostrf(Fah, 4, 6, tempBuff);  //4 is mininum width, 6 is precision
+  temp = tempBuff;
+  // pCharacteristic->setValue();
+  // pCharacteristic->setValue("temperature: " + temp);
   // setting temperature threshold for when to lower the windows.
   if(Fah >= thresholdTemp ){
     // digitalWrite(7,HIGH); 
     // Serial.println("THE CAR IS TOOOOOO HOT ");
     Serial.println("The car is over 85. Lower windows!");
     windowLowering = 1; // lower the window
+    digitalWrite(redLED, HIGH);
   }
   else{
     // digitalWrite(7,LOW); 
     Serial.println("The car is under 85");
     windowLowering = 0; // dont lower the window 
+    digitalWrite(redLED, LOW);
   }
 
   // window only lowers if child is in car
   if(childInCar == 1){
     // the first if is the scenario where you told the window to go down but the window does not lower.
-    if(windowLowering == 1 && confirmWindow == 0 && distIn <= thresholdProx){
-      Serial.println("The window lowering mechanism is broken");
-    }
+    // if(windowLowering == 1 && confirmWindow == 0 && distIn <= thresholdProx){
+    //   Serial.println("The window lowering mechanism is broken");
+    // }
     // the window has been sent a signal to lower and it has lowered past the proximity sensor. 
     // This confirms that the window has lowered
-    else if(windowLowering == 1 && distIn >= thresholdProx){ 
+    if(windowLowering == 1 && distIn <= thresholdProx){ 
       // digitalWrite(blueLED, HIGH);
       Serial.print("The window is lowering.");
-      delay(3000); // wait three seconds for the window to get to the right level
+      digitalWrite(blueLED, HIGH);
+      Serial.println("Moving Upwward");
+      digitalWrite(motor1Pin1, HIGH);
+      digitalWrite(motor1Pin2, LOW); 
+      while (dutyCycle <= 255){
+        ledcWrite(enable1Pin, dutyCycle);   
+        Serial.print("Forward with duty cycle: ");
+        Serial.println(dutyCycle);
+        dutyCycle = dutyCycle + 5;
+        delay(500);
+      }
+      dutyCycle = 200;
+      // delay(69000); // wait three seconds for the window to get to the right level
       Serial.println("The window has been lowered to the correct level");
       windowLowering = 0; // reset signal
       Serial.println("The window is lowered after request");
       confirmWindow = 1; // reset signal
+      digitalWrite(blueLED, LOW);
     }
+    // digitalWrite(blueLED, LOW);
   }
   else{
     Serial.println("Child is not in car");
+    
   }
   
   // else if(windowLowering == 1 && distIn >= thresholdProx){ // The window is up and has not lowered.
