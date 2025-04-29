@@ -3,6 +3,7 @@
   https://stackoverflow.com/questions/77080095/problem-with-instanciation-on-flutterblueplus
   https://www.youtube.com/watch?v=an4NbIjcXYI
 */
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
@@ -23,6 +24,7 @@ class bluetooth_cont extends GetxController{
   var subscription = FlutterBluePlus.adapterState.listen((BluetoothAdapterState state) {
       print(state);
       if (state == BluetoothAdapterState.on) {
+        print("got the state");
           // usually start scanning, connecting, etc
       } else {
           // show an error to the user, etc
@@ -36,64 +38,40 @@ class bluetooth_cont extends GetxController{
   }
 
   // cancel to prevent duplicate listeners
-  subscription.cancel();
+  // subscription.cancel();
+  print("getting permission complete");
 
-}
+  }
+  static Future<void> connectDevice(BluetoothDevice device) async{
+    print("within connect: $device");
+    
+   // listen for disconnection
+    var subscription = device.connectionState.listen((BluetoothConnectionState state) async {
+        if (state == BluetoothConnectionState.disconnected) {
+            // 1. typically, start a periodic timer that tries to 
+            //    reconnect, or just call connect() again right now
+            // 2. you must always re-discover services after disconnection!
+            print("${device.disconnectReason?.code} ${device.disconnectReason?.description}");
+        }
+    });
 
+    // cleanup: cancel subscription when disconnected
+    //   - [delayed] This option is only meant for `connectionState` subscriptions.  
+    //     When `true`, we cancel after a small delay. This ensures the `connectionState` 
+    //     listener receives the `disconnected` event.
+    //   - [next] if true, the the stream will be canceled only on the *next* disconnection,
+    //     not the current disconnection. This is useful if you setup your subscriptions
+    //     before you connect.
+    device.cancelWhenDisconnected(subscription, delayed:true, next:true);
 
-Future scanDevices() async{
+    // Connect to the device
+    await device.connect(timeout: Duration(seconds: 15));
+    print("connected to device");
 
-  // listen to scan results
-// Note: `onScanResults` clears the results between scans. You should use
-//  `scanResults` if you want the current scan results *or* the results from the previous scan.
-var subscription = FlutterBluePlus.onScanResults.listen((results) {
-    if (results.isNotEmpty) {
-        ScanResult r = results.last; // the most recently found device
-        print('${r.device.remoteId}: "${r.advertisementData.advName}" found!');
-    }
-  },
-  onError: (e) => print(e),
-);
+    // Disconnect from device
+    // await device.disconnect();
 
-// cleanup: cancel subscription when scanning stops
-FlutterBluePlus.cancelWhenScanComplete(subscription);
-
-// Wait for Bluetooth enabled & permission granted
-// In your real app you should use `FlutterBluePlus.adapterState.listen` to handle all states
-await FlutterBluePlus.adapterState.where((val) => val == BluetoothAdapterState.on).first;
-
-// Start scanning w/ timeout
-// Optional: use `stopScan()` as an alternative to timeout
-// await FlutterBluePlus.startScan(
-//   withServices:[Guid("180D")], // match any of the specified services
-//   withNames:["Bluno"], // *or* any of the specified names
-//   timeout: Duration(seconds:15));
-FlutterBluePlus.startScan(timeout: Duration(seconds:15));
-FlutterBluePlus.stopScan();
-// wait for scanning to stop
-await FlutterBluePlus.isScanning.where((val) => val == false).first;
-}
-
-
-
-
-  // FlutterBluePlus scanner = FlutterBluePlus.instance;
-  // no longer used. Just use FlutterBluePlus.isScanning now according to the stackOverflow
-  // Future scanDevices() async{
-  //   if (await Permission.bluetooth.isRestricted){
-  //     if (await Permission.bluetoothScan.request().isGranted){
-  //       if (await Permission.bluetoothConnect.request().isGranted){
-
-  //         FlutterBluePlus.startScan(timeout: const Duration(seconds: 5));
-
-  //         FlutterBluePlus.stopScan();
-
-  //       }
-  //     }
-
-  //   }
-  // }
-
-
-  // Stream<List<ScanResult>> get scanResult => FlutterBluePlus.scanResults;
+    // cancel to prevent duplicate listeners
+    // subscription.cancel(); 
+  }
 }
