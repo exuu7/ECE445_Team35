@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:get/get_state_manager/src/simple/get_state.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:test_notifs/notification.dart';
@@ -18,6 +21,20 @@ https://www.youtube.com/watch?v=26TTYlwc6FM
 
 Flutter push notifications documentation and set up code: https://pub.dev/packages/flutter_local_notifications#requesting-permissions-on-android-13-or-higher
 */
+
+
+/*
+  Bluetooth citations:
+  https://kursatsayhan.medium.com/using-bluetooth-low-energy-ble-with-flutter-3c70469af814
+  https://pub.dev/packages/flutter_blue_plus
+  https://medium.com/@sparkleo/the-essentials-core-ble-concepts-and-flutter-blue-plus-1df8820b9651
+  https://www.youtube.com/watch?v=0edSNTjAaRg 
+  https://stackoverflow.com/questions/77080095/problem-with-instanciation-on-flutterblueplus
+  https://www.youtube.com/watch?v=an4NbIjcXYI
+  https://kursatsayhan.medium.com/using-bluetooth-low-energy-ble-with-flutter-3c70469af814
+
+
+ */
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -172,9 +189,9 @@ class HomePage extends StatelessWidget {
     // than having to individually change instances of widgets.
 
     // temporary for now
-    int tempVal = 82;
-    int coVal = 10;
-    int batVal = 100;
+    int tempVal = 0;
+    int coVal = 0;
+    int batVal = 0;
 
     var uri = Uri.http('192.168.4.1', '');
     
@@ -559,13 +576,60 @@ class InfoPage extends StatelessWidget {
 } // end of info page
 
 
+class BLE_Scanner extends StatefulWidget{
+  @override
+  State<BLE_Scanner> createState() => _BLE_Scanner();
+}
 
-
-class BLE_Scanner extends StatelessWidget {
+class _BLE_Scanner extends State<BLE_Scanner> {
 
   
-  bool bluetoothState = false;
-  // bool value = true;
+  final StreamController<List<ScanResult>> _scanCont = StreamController.broadcast();
+  Stream<List<ScanResult>> get scanResult => _scanCont.stream;
+  List<ScanResult> devices = [];
+  late StreamSubscription<List<ScanResult>> scanSub;
+
+  Future<void> scanDevices() async{
+    devices.clear();
+    _scanCont.add(devices);
+    // listen to scan results
+    // Note: `onScanResults` clears the results between scans. You should use
+    //  `scanResults` if you want the current scan results *or* the results from the previous scan.
+    scanSub = FlutterBluePlus.onScanResults.listen((results) {
+            if (results.isNotEmpty) {
+                ScanResult r = results.last; // the most recently found device
+                // print('${r.device.remoteId}: "${r.advertisementData.advName}: ${r.device.platformName}" found!');
+                print('${r.device}" found!');
+                devices = results;
+                _scanCont.add(devices);
+            }
+        },
+        onError: (e) => print(e),
+    );
+
+    // cleanup: cancel subscription when scanning stops
+    FlutterBluePlus.cancelWhenScanComplete(scanSub);
+
+    // Wait for Bluetooth enabled & permission granted
+    await FlutterBluePlus.adapterState.where((val) => val == BluetoothAdapterState.on).first;
+
+    // Start scanning w/ timeout
+    await FlutterBluePlus.stopScan();
+    await FlutterBluePlus.startScan(timeout: Duration(seconds:5));
+
+    // wait for scanning to stop
+    await FlutterBluePlus.isScanning.where((val) => val == false).first;
+}
+
+    
+
+  @override
+  void dispose(){
+    FlutterBluePlus.stopScan();
+    scanSub.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     // var appState = context.watch<MyAppState>();
@@ -581,6 +645,7 @@ class BLE_Scanner extends StatelessWidget {
             // title: Text(widget.title),
             title: Text("CarGuard"),
           ),
+       
           body: GetBuilder<bluetooth_cont>(
               init:bluetooth_cont(),
               builder: (bluetooth_cont controller){
@@ -588,102 +653,58 @@ class BLE_Scanner extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min, 
                       children: [
                         SizedBox(height: 15,),
-                        // Flexible(
-                        //   flex:1,
-                        //   child: StreamBuilder(
-                        //     stream: FlutterBluePlus.adapterState,
-                        //     builder: (context, snapshot){
-                        //       if (snapshot.data != null){
-                        //         if (snapshot.data == BluetoothAdapterState.on){
-                        //           bluetoothState = true;
-                        //         }
-                        //         else if (snapshot.data == BluetoothAdapterState.off){
-                        //           bluetoothState = false;
-                        //         }
-                        //         return Container(
-                        //           height: 20,
-                        //           child: SwitchListTile(
-                        //             activeColor: Colors.blue,
-                        //             activeTrackColor: Colors.black,
-                        //             inactiveTrackColor: Colors.grey,
-                        //             inactiveThumbColor: Colors.white,
-                        //             selectedTileColor: Colors.red,
-                        //             title: Text('lksadjfalsdkjlksdjf'),
-                        //             value: bluetoothState,
-                        //             onChanged: (bool value) {
-                        //               setState((){
-                        //                   bluetoothState = !bluetoothState;
-                        //                   if (value) {
-                        //                     FlutterBluePlus.turnOn();
-                        //                   }
-                        //                   else{
-                        //                     FlutterBluePlus.turnOff();
-                        //                   }
-                        //                 }
 
-                        //               );
-                        //             }
-                        //           ),
-                                  
-                        //         );
-                        //       }
-                        //       else{
-                        //         return Container();
-                        //       }
-                        //     }
-                        //   ),
-                        // ),
-                        // Expanded(child: StreamBuilder <List<ScanResult>>( 
-                        //   stream: controller.scanResult,
-                        //   builder: (context,snapshot){
-                        //       print("l;ksdfjkl;ajdsfadslkfjdslfkf;lsajfkl;fjlsdf");
-                        //       print(snapshot.hasData);
-                        //       if (snapshot.hasData && snapshot.data!.isNotEmpty){
-                        //           print("in");
-                                  
-                        //         return ListView.builder(
-                        //               itemCount: snapshot.data!.length,
-                        //               itemBuilder: (context, index){
-                        //                 final data = snapshot.data![index];
-                        //                 return Card(
-                        //                   elevation: 2,
-                        //                   child: ListTile(
-                        //                       // ignore: deprecated_member_use
-                        //                       title: Text(data.device.name),
-                        //                       // subtitle: Text(data.device.id.id),
-                        //                       // trailing: Text(data.rssi.toString()),
-                                            
-                        //                     )
-                        //                   );
-                        //                 }
-                        //               );
+                        Expanded(child: StreamBuilder <List<ScanResult>>( 
+                          stream: scanResult,
+                          builder: (context,snapshot){
+                              print(snapshot.hasData);
+                              if (snapshot.hasData && snapshot.data!.isNotEmpty){
+   
+                                return ListView.builder(
+                                      itemCount: snapshot.data!.length,
+                                      itemBuilder: (context, index){
+                                        final data = snapshot.data![index];
+                                        return Card(
+                                          elevation: 2,
+                                          child: ListTile(
+                                              // title: Text(data.device.remoteId.toString()),
+                                              subtitle: Text(data.device.platformName),
+                                              // trailing: Text(data.rssi.toString()),
+                                              onTap: () => bluetooth_cont.connectDevice(data.device),
+                                            )
+                                          );
+                                        }
+                                      );
                                  
-                        //       }
-                        //       else{
-                        //         return Center(child: Text("No Devices Found"));
-                        //       }
-                        //   }
-                        // ),
-                        // ),
-                        // SizedBox(height: 15,),
-                       
-                        ElevatedButton(
-                          onPressed: ()=> controller.scanDevices(), 
-                          child: Text("Scan"),
+                              }
+                              else{
+                                return Center(child: Text("No Devices Found"));
+                              }
+                          }
                         ),
-
+                        ),
+                        SizedBox(height: 15,),
+                       
                       ]
                     );
                     
               }
 
-          )
+          ),
 
 
-
-
+        floatingActionButton: FloatingActionButton(
+          child: Text("Scan"),
+          onPressed: () async{
+            await bluetooth_cont.btPermission();
+            await scanDevices();
+          }),  
+        
         ); // end of scaffold
+        
       }
+
     );
   }
+
 } // end of info page
